@@ -1,4 +1,4 @@
-	
+
 #import "SKDatabase.h"
 #import "AppDelegate.h"
 
@@ -35,6 +35,7 @@
 		NSArray *docPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *docDir = [docPaths objectAtIndex:0];
 		NSString *docPath = [docDir stringByAppendingPathComponent:dbFile];
+        NSLog(@"path%@",docPath);
 		
 		NSFileManager *fileManager = [NSFileManager defaultManager];
 		
@@ -45,7 +46,7 @@
 			
 			NSError *error;
 			int success = [fileManager copyItemAtPath:origPath toPath:docPath error:&error];			
-			NSAssert1(success,[NSString stringWithString:@"Failed to copy database into dynamic location"],error);
+			NSAssert1(success,@"Failed to copy database into dynamic location",error);
 		}
 		int result = sqlite3_open([docPath UTF8String], &dbh);
 		NSAssert1(SQLITE_OK == result, NSLocalizedStringFromTable(@"Unable to open the sqlite database (%@).", @"Database", @""), [NSString stringWithUTF8String:sqlite3_errmsg(dbh)]);	
@@ -63,7 +64,7 @@
 		NSString *docPath = [docDir stringByAppendingPathComponent:dbFile]; 
 		bool success = [data writeToFile:docPath atomically:YES];
 		
-		NSAssert1(success,[NSString stringWithString:@"Failed to save database into documents path"], nil);
+		NSAssert1(success,@"Failed to save database into documents path", nil);
 		
 		int result = sqlite3_open([docPath UTF8String], &dbh);
 		NSAssert1(SQLITE_OK == result, NSLocalizedStringFromTable(@"Unable to open the sqlite database (%@).", @"Database", @""), [NSString stringWithUTF8String:sqlite3_errmsg(dbh)]);	
@@ -95,10 +96,14 @@
 {
 	sqlite3_stmt *statement;
 	id result;
-	NSMutableArray *thisArray = [[NSMutableArray alloc]init];
+	
+    NSMutableArray *thisArray = [[NSMutableArray alloc]init];
+    
     statement = [self prepare:sql];
-	if (statement) {
-		while (sqlite3_step(statement) == SQLITE_ROW) {	
+	
+    if (statement) {
+		while (sqlite3_step(statement) == SQLITE_ROW)
+        {
 			NSMutableDictionary *thisDict = [NSMutableDictionary dictionaryWithCapacity:4];
 			for (int i = 0 ; i < sqlite3_column_count(statement) ; i++)
             {
@@ -124,8 +129,8 @@
                        // result = [result stringByReplacingOccurrencesOfString:@"\'" withString:@"'"];
                         [thisDict setObject:[result stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
                                      forKey:[NSString stringWithUTF8String:sqlite3_column_name(statement,i)]];
-                        [result release];
-                        result = nil;
+//                        [result release];
+//                        result = nil;
 					}
 				}
 				if (result) {
@@ -189,7 +194,7 @@
 	sqlite3_finalize(statement);
     
     NSLog(@"result -------------> %@",result );
-    NSLog(@"result -------------> %d",[result integerValue]);
+    NSLog(@"result -------------> %ld",(long)[result integerValue]);
 	return result;
 	
 }
@@ -261,7 +266,7 @@
 
 
 #pragma mark add playlist
-
+/*
 -(void) addPlayList:(MPMediaItemCollection *)mediaCollection classid:(int)classid count:(int)order
 {
     NSLog(@"count %d",[mediaCollection count]);
@@ -358,6 +363,9 @@
     
 	return;
 }
+ 
+ */
+
 #pragma mark ----------------
 
 // INSERTing and UPDATing
@@ -376,7 +384,7 @@
 	[sql appendFormat:@") VALUES("];
 	for (int i = 0 ; i < [dbData count] ; i++) {
 		if ([[[dbData objectAtIndex:i] objectForKey:@"value"] intValue]) {
-			[sql appendFormat:@"%@",[[[dbData objectAtIndex:i] objectForKey:@"value"] intValue]];
+			[sql appendFormat:@"%d",[[[dbData objectAtIndex:i] objectForKey:@"value"] intValue]];
 		} else {
 			[sql appendFormat:@"'%@'",[[dbData objectAtIndex:i] objectForKey:@"value"]];
 		}
@@ -524,7 +532,7 @@
 	
     NSLog(@"sql %@",sql);
 	int result = 0;
-	NSAssert1(self.dynamic == 1,[NSString stringWithString:@"Tried to use a dynamic function on a static database"],NULL);
+	NSAssert1(self.dynamic == 1,@"Tried to use a dynamic function on a static database",NULL);
 	sqlite3_stmt *statement;
 	if ((statement = [self prepare:sql])) {
 		result = sqlite3_step(statement);
@@ -544,18 +552,18 @@
 
 - (NSString *)escapeString:(NSString *)dirtyString{
 	NSString *cleanString = [dirtyString stringByReplacingOccurrencesOfString:@"'" withString:@"''"];
-	[cleanString autorelease];
+	//[cleanString autorelease];
 	
 	return cleanString;
 }
 
 // requirements for closing things down
 
-- (void)dealloc {
-	[self close];
-	[delegate release];
-	[super dealloc];
-}
+//- (void)dealloc {
+//	[self close];
+//	[delegate release];
+//	[super dealloc];
+//}
 
 - (void)close {
 	

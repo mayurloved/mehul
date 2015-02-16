@@ -1,7 +1,7 @@
 
 #import <UIKit/UIKit.h>
 #import <sqlite3.h>
-#import <MediaPlayer/MediaPlayer.h>
+//#import <MediaPlayer/MediaPlayer.h>
 
 
 @protocol SKDatabaseDelegate <NSObject>
@@ -11,7 +11,7 @@
 
 @interface SKDatabase : NSObject {
 	
-	id<SKDatabaseDelegate> delegate;
+	//id <SKDatabaseDelegate>delegate;
 	sqlite3 *dbh;
 	BOOL dynamic;
 }
@@ -59,8 +59,8 @@
 
 #pragma mark --------
 
--(void) addPlayList:(MPMediaItemCollection *)mediaCollection classid:(int)classid orderNumber:(int)order;
--(void) addPlayList:(MPMediaItemCollection *)mediaCollection classid:(int)classid count:(int)order;
+//-(void) addPlayList:(MPMediaItemCollection *)mediaCollection classid:(int)classid orderNumber:(int)order;
+//-(void) addPlayList:(MPMediaItemCollection *)mediaCollection classid:(int)classid count:(int)order;
 
 #pragma mark --------
 @end
